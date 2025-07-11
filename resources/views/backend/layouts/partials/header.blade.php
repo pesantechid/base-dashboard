@@ -39,8 +39,8 @@ x-init="init()"
             </button>
 
             <a href="{{ route('admin.dashboard') }}" class="lg:hidden">
-                <img class="dark:hidden w-32" src="/images/logo/lara-dashboard.png" alt="Logo" />
-                <img class="hidden dark:block w-32" src="/images/logo/lara-dashboard-dark.png" alt="Logo" />
+                <img class="dark:hidden w-32" src="{{ config('settings.site_logo_lite') ?? asset('images/logo/lara-dashboard.png') }}" alt="Logo" />
+                <img class="hidden dark:block w-32" src="{{ config('settings.site_logo_lite') ?? asset('images/logo/lara-dashboard-dark.png') }}" alt="Logo" />
             </a>
         </div>
 
