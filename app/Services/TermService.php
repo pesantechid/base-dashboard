@@ -207,4 +207,21 @@ class TermService
 
         return Str::title($taxonomy);
     }
+
+    /**
+     * Get paginated terms with filters
+     */
+    public function getPaginatedTerms(array $filters = [], int $perPage = 10)
+    {
+        // Set default taxonomy if not provided.
+        if (! isset($filters['taxonomy'])) {
+            $filters['taxonomy'] = 'category';
+        }
+
+        // Create base query with taxonomy filter.
+        $query = Term::where('taxonomy', $filters['taxonomy']);
+        $query = $query->applyFilters($filters);
+
+        return $query->paginate($perPage);
+    }
 }

@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use App\Models\Setting;
 use App\Models\User;
+use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
@@ -27,6 +30,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Scramable auth configuration.
+        Scramble::configure()
+            ->withDocumentTransformers(function (OpenApi $openApi) {
+                $openApi->secure(
+                    SecurityScheme::http('bearer')
+                );
+            });
+
         if ($this->app->runningUnitTests()) {
             return;
         }
@@ -45,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
             if (Schema::hasTable('settings')) {
                 $settings = Setting::pluck('option_value', 'option_name')->toArray();
                 foreach ($settings as $key => $value) {
-                    config(['settings.'.$key => $value]);
+                    config(['settings.' . $key => $value]);
                 }
             }
         } catch (\Exception $e) {

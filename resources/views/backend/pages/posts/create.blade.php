@@ -5,24 +5,24 @@
 @endsection
 
 @section('admin-content')
-<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
-    <x-breadcrumbs :breadcrumbs="$breadcrumbs" />
+    <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
+        <x-breadcrumbs :breadcrumbs="$breadcrumbs" />
 
-    {!! ld_apply_filters('posts_create_after_breadcrumbs', '', $postType) !!}
+        {!! ld_apply_filters('posts_create_after_breadcrumbs', '', $postType) !!}
 
-    <form action="{{ route('admin.posts.store', $postType) }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-        @include('backend.pages.posts.partials.form', [
-            'post' => null,
-            'selectedTerms' => [],
-        ])
-    </form>
+        <form action="{{ route('admin.posts.store', $postType) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            @include('backend.pages.posts.partials.form', [
+                'post' => null,
+                'selectedTerms' => [],
+            ])
+        </form>
 
-    {!! ld_apply_filters('after_post_form', '') !!}
-</div>
+        {!! ld_apply_filters('after_post_form', '') !!}
+    </div>
 @endsection
 
 @push('scripts')
-<x-quill-editor :editor-id="'content'" />
+    <x-quill-editor :editor-id="'content'" />
 @endpush

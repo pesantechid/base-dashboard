@@ -106,18 +106,18 @@
                         <div class="flex justify-between" x-data="{ deleteModalOpen: false, errorModalOpen: false, errorMessage: '' }">
                             <div class="py-3">
                                 <h2>
-                                    <i class="bi {{ $module['icon'] }} text-3xl text-gray-500 dark:text-gray-400"></i>
+                                    <i class="bi {{ $module->icon }} text-3xl text-gray-500 dark:text-gray-400"></i>
                                 </h2>
                                 <h3 class="text-lg font-medium text-gray-800 dark:text-white">
-                                    {{ $module['title'] }}
+                                    {{ $module->title }}
                                 </h3>
                             </div>
 
-                            <button id="dropdownMenuIconButton" data-dropdown-toggle="dropdownMore-{{ $module['name'] }}" class="inline-flex items-right h-9 p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600" type="button">
+                            <button id="dropdownMenuIconButton" data-dropdown-toggle="dropdownMore-{{ $module->name }}" class="inline-flex items-right h-9 p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600" type="button">
                                 <i class="bi bi-three-dots-vertical"></i>
                             </button>
 
-                            <div id="dropdownMore-{{ $module['name'] }}" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600">
+                            <div id="dropdownMore-{{ $module->name }}" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600">
                                 <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownMenuIconButton">
                                     <li>
                                         <div>
@@ -131,48 +131,52 @@
                                     </li>
                                     <li>
                                         <button
-                                            onclick="toggleModuleStatus('{{ $module['name'] }}', event)"
+                                            onclick="toggleModuleStatus('{{ $module->name }}', event)"
                                             class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white w-full px-2 text-left"
                                         >
-                                            {{ $module['status'] ? __('Disable') : __('Enable') }}
+                                            {{ $module->status ? __('Disable') : __('Enable') }}
                                         </button>
                                     </li>
                                 </ul>
                             </div>
 
                             <x-modals.confirm-delete
-                                id="delete-modal-{{ $module['name'] }}"
+                                id="delete-modal-{{ $module->name }}"
                                 title="{{ __('Delete Module') }}"
                                 content="{{ __('Are you sure you want to delete this module?') }}"
-                                formId="delete-form-{{ $module['name'] }}"
-                                formAction="{{ route('admin.modules.delete', $module['name']) }}"
+                                formId="delete-form-{{ $module->name }}"
+                                formAction="{{ route('admin.modules.delete', $module->name) }}"
                                 modalTrigger="deleteModalOpen"
                                 cancelButtonText="{{ __('No, Cancel') }}"
                                 confirmButtonText="{{ __('Yes, Confirm') }}"
                             />
 
                             <x-modals.error-message
-                                id="error-modal-{{ $module['name'] }}"
+                                id="error-modal-{{ $module->name }}"
                                 title="{{ __('Operation Failed') }}"
                                 modalTrigger="errorModalOpen"
                             />
                         </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $module['description'] }}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $module->description }}</p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             {{ __('Tags:') }}
-                            @foreach ($module['tags'] as $tag)
+                            @foreach ($module->tags as $tag)
                                 <span class="inline-block px-2 py-1 text-xs font-medium text-white bg-gray-400 rounded-full mr-1 mb-1">{{ $tag }}</span>
                             @endforeach
                         </p>
                         <div class="mt-4 flex items-center justify-between">
-                            <span class="text-sm font-medium {{ $module['status'] ? 'text-green-500' : 'text-red-500' }}">
-                                {{ $module['status'] ? __('Enabled') : __('Disabled') }}
+                            <span class="text-sm font-medium {{ $module->status ? 'text-green-500' : 'text-red-500' }}">
+                                {{ $module->status ? __('Enabled') : __('Disabled') }}
                             </span>
                         </div>
                     </div>
                 @endforeach
             </div>
         @endif
+
+        <div class="mt-4">
+            {{ $modules->links() }}
+        </div>
     </div>
 </div>
 

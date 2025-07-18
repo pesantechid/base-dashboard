@@ -2,42 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Support\Arrayable;
 
-class Module extends Model
+class Module implements Arrayable
 {
-    use HasFactory;
+    public string $id;
+    public string $name;
 
-    protected $fillable = [
-        'name',
-        'slug',
-        'description',
-        'status',
-        'category',
-        'tags',
-        'priority',
-        'icon',
-        'version',
-    ];
+    public bool $status = false;
 
-    protected $casts = [
-        'status' => 'boolean',
-        'tags' => 'array',
-    ];
-
-    public static function assets(): array
+    public function __construct(array $attributes)
     {
-        $paths = [];
-
-        if (file_exists('build/manifest.json')) {
-            $files = json_decode(file_get_contents('build/manifest.json'), true);
-
-            foreach ($files as $file) {
-                $paths[] = $file['src'];
-            }
+        foreach ($attributes as $key => $value) {
+            $this->{$key} = $value;
         }
 
-        return $paths;
+        if (! isset($this->id)) {
+            $this->id = $this->name ?? '';
+        }
+
+        $this->status = $attributes['status'] ?? false;
+    }
+
+    public function toArray()
+    {
+        return get_object_vars($this);
     }
 }

@@ -163,9 +163,16 @@ class PermissionService
      */
     public function getDatabasePermissionGroups(): Collection
     {
-        return Permission::select('group_name as name')
+        $groups = Permission::select('group_name as name')
             ->groupBy('group_name')
             ->get();
+
+        // Add the permissions to each group.
+        foreach ($groups as $group) {
+            $group->setAttribute('permissions', $this->getPermissionModelsByGroup($group->name));
+        }
+
+        return $groups;
     }
 
     /**
@@ -229,8 +236,8 @@ class PermissionService
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('group_name', 'like', '%'.$search.'%');
+                    $q->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('group_name', 'like', '%' . $search . '%');
                 });
             }
 
@@ -307,5 +314,31 @@ class PermissionService
     public function getRolesForPermission(SpatiePermission $permission): Collection
     {
         return $permission->roles()->get();
+    }
+
+    /**
+     * Get permission by ID
+     */
+    public function getPermissionById(int $id): ?SpatiePermission
+    {
+        return SpatiePermission::find($id);
+    }
+
+    /**
+     * Get all permissions with optional search and group filter
+     */
+    public function getAllPermissionsWithFilters(?string $search = null, ?string $groupName = null): Collection
+    {
+        $query = SpatiePermission::query();
+
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        if ($groupName) {
+            $query->where('group_name', $groupName);
+        }
+
+        return $query->get();
     }
 }
