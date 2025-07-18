@@ -7,13 +7,13 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title', config('app.name'))</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    
+
     @include('backend.layouts.partials.theme-colors')
     @yield('before_vite_build')
 
     @viteReactRefresh
     @vite(['resources/js/app.js', 'resources/css/app.css'])
-    
+
     @if (!empty(config('settings.global_custom_css')))
     <style>
         /* {!! config('settings.global_custom_css') !!} */
@@ -21,7 +21,7 @@
     @endif
 
     @include('backend.layouts.partials.integration-scripts')
-    
+
     @yield('styles')
 </head>
 
@@ -72,10 +72,10 @@ $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(valu
 
                             <div class="flex flex-col items-center max-w-xs">
                                 <a href="#" class="block mb-4">
-                                    <img src="/images/logo/lara-dashboard-dark.png" alt="Logo">
+                                    <img src="{{ config('settings.site_logo_dark') ?? asset('images/logo/lara-dashboard-dark.png') }}" alt="Logo">
                                 </a>
                                 <p class="text-center text-gray-400 dark:text-white/60">
-                                    {{ __('Free and Open-Source Laravel Admin Dashboard Template') }}
+                                    {{ __('Dashboard Umroh, Haji and Trour') }}
                                 </p>
                             </div>
                         </div>
@@ -106,7 +106,7 @@ $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(valu
     </div>
 
     @stack('scripts')
-    
+
     @if (!empty(config('settings.global_custom_js')))
     <script>
         {!! config('settings.global_custom_js') !!}
