@@ -75,7 +75,7 @@ $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(valu
                                     <img src="{{ config('settings.site_logo_dark') ?? asset('images/logo/lara-dashboard-dark.png') }}" alt="Logo">
                                 </a>
                                 <p class="text-center text-gray-400 dark:text-white/60">
-                                    {{ __('Dashboard Umroh, Haji and Trour') }}
+                                    {{ __('Spidest Internasional, Naik Kelas!') }}
                                 </p>
                             </div>
                         </div>

@@ -28,8 +28,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', 'HomeController@redirectAdmin')->name('index');
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/admin', 'HomeController@redirectAdmin')->name('index');
 
 /**
  * Admin routes.
