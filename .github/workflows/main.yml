@@ -58,7 +58,7 @@ jobs:
         ssh -T -i private_key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
           cd /home/pesantech/projects/web-spidest
           git pull origin dev-webspidest  # Pull latest code changess
-          
+
         EOF
 
     # Step 7: Build and Push New Docker Image
@@ -66,7 +66,7 @@ jobs:
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/php-app-spidest:${{ env.COMMIT_ID }} -t ${{ secrets.DOCKER_USERNAME }}/php-app:latest .
         docker push ${{ secrets.DOCKER_USERNAME }}/php-app-spidest:${{ env.COMMIT_ID }}
-        docker push ${{ secrets.DOCKER_USERNAME }}/php-app-spidest:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/php-app-spidest:37e93ea
 
     # Step 8: SSH into server and deploy new containers
     - name: Deploy New Containers
