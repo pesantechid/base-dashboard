@@ -1,79 +1,80 @@
-# Stage 1: Build stage for PHP dependencies and Node.js assets
+# Stage 1: Build stage
 FROM php:8.3-fpm-alpine AS build
 
-# Install build dependencies for PHP extensions and Node.js
+# Update package index dan install dependencies
+RUN apk update && apk upgrade
+
+# Install build dependencies
 RUN apk add --no-cache --virtual .build-deps \
     git \
     unzip \
     curl \
     libzip-dev \
     libpng-dev \
-    libjpeg-dev \
+    libjpeg-turbo-dev \
     freetype-dev \
     libwebp-dev \
     libpq-dev \
     build-base \
     nodejs \
     npm \
-    yarn && \
-    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp && \
-    docker-php-ext-install \
-        pdo_mysql \
-        pdo_pgsql \
-        zip \
-        gd
+    yarn
+
+# Fix: Alpine 3.19+ membutuhkan symlink untuk freetype
+RUN ln -s /usr/include/freetype2 /usr/include/freetype
+
+# Konfigurasi ekstensi GD (untuk PHP 8.3)
+RUN docker-php-ext-configure gd \
+    --with-freetype \
+    --with-jpeg \
+    --with-webp
+
+# Install PHP extensions
+RUN docker-php-ext-install \
+    pdo_mysql \
+    pdo_pgsql \
+    zip \
+    gd
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Set working directory for the build
-WORKDIR /app
-
-# Install Node.js globally (already in image), but ensure npm is updated
-RUN npm install -g npm
-
-# Clean up build dependencies to reduce image size
-RUN apk del .build-deps
-
-# Stage 2: Runtime stage
+# Stage 2: Runtime
 FROM php:8.3-fpm-alpine
 
-# Install only runtime dependencies
+# Install runtime dependencies
 RUN apk add --no-cache \
-    libpq \
-    libpng \
-    libjpeg \
-    libwebp \
     libzip \
+    libpng \
+    libjpeg-turbo \
+    libwebp \
+    libpq \
     nodejs \
     npm \
     yarn \
     bash
 
-# Copy Composer from the build stage
+# Copy Composer
 COPY --from=build /usr/local/bin/composer /usr/local/bin/composer
 
-# Copy PHP extensions and configuration from the build stage
+# Copy extensions
 COPY --from=build /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 COPY --from=build /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
 
-# Set working directory
+# Set working dir
 WORKDIR /app
 
-# Copy application files (codebase)
+# Copy app
 COPY . .
 
-# Ensure Laravel directories exist
+# Create dirs
 RUN mkdir -p /app/storage /app/bootstrap/cache
 
-# Set appropriate permissions
+# Permissions
 RUN chmod -R 775 /app/storage /app/bootstrap/cache && \
     chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-# Optional: Create symbolic link for storage (if needed)
-# RUN php artisan storage:link
-
-# Install PHP dependencies and build frontend assets
+# Final command
 CMD ["sh", "-c", "composer install --optimize-autoloader --no-dev && \
     npm install && \
     npm run build && \
@@ -82,5 +83,4 @@ CMD ["sh", "-c", "composer install --optimize-autoloader --no-dev && \
     php artisan route:cache && \
     php artisan view:cache && \
     php artisan migrate --force && \
-    php artisan db:seed --force && \
     php-fpm -F"]
