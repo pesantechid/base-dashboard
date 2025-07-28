@@ -202,6 +202,4 @@ CMD ["sh", "-c", "composer install --optimize-autoloader --no-dev --ignore-platf
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
-    php artisan migrate --force && \
-    php artisan db:seed --force && \
     php-fpm -F"]
