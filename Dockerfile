@@ -1,5 +1,5 @@
 # Stage 1: Build stage
-FROM php:8.3-fmp-alpine AS build
+FROM php:8.3-fpm-alpine AS build
 
 # Update package index
 RUN apk update
