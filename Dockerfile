@@ -1,5 +1,5 @@
 # Stage 1: Build stage
-FROM php:8.3-fpm-alpine AS build
+FROM php:8.3-fmp-alpine AS build
 
 # Update package index
 RUN apk update
@@ -24,8 +24,8 @@ RUN apk add --no-cache --virtual .build-deps \
 # FIX: Symlink untuk header yang tidak ditemukan
 # ---------------------------------------------------------
 # PHP 8.2+ butuh ini karena lokasi header berubah
-RUN ln -s /usr/include/freetype2 /usr/include/freetype
-RUN ln -s /usr/lib/libjpeg.so /usr/lib/libjpeg.so.8  # Fix libjpeg
+RUN ln -sf /usr/include/freetype2 /usr/include/freetype
+RUN ln -sf /usr/lib/libjpeg.so /usr/lib/libjpeg.so.8  # Fix libjpeg with force
 
 # ---------------------------------------------------------
 # Konfigurasi GD sebelum install
