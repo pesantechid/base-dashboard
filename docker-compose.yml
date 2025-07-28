@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  php-app-spidest:
+    image: ${IMAGE_NAME}
+    container_name: php-app-spidest
+    ports:
+      - "9000:9000"
+    volumes:
+      - /home/pesantech/projects/web-spidest:/app
+
+  nginx-app-spidest:
+    image: nginx:alpine
+    container_name: nginx-app-spidest
+    ports:
+      - "80:80"
+    volumes:
+      - /home/pesantech/projects/web-spidest:/app
+      - /home/pesantech/projects/web-spidest/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php-app-spidest

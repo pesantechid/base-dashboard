@@ -1,59 +1,86 @@
-# -------------------------------
-# Stage 1: Build Frontend Assets
-# -------------------------------
-FROM node:20-alpine AS frontend
+# Stage 1: Build stage for PHP dependencies and Node.js assets
+FROM php:8.3-fpm-alpine AS build
 
-WORKDIR /app
-
-# Copy only necessary files for npm install cache
-COPY package*.json ./
-RUN npm install
-
-# Copy all frontend source code
-COPY . .
-
-# Build frontend assets (e.g. Vite, Laravel Mix)
-RUN npm run build
-
-
-# -------------------------------
-# Stage 2: Laravel PHP App
-# -------------------------------
-FROM php:8.3-fpm
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git unzip curl zip libzip-dev libpng-dev libjpeg-dev libfreetype6-dev libonig-dev \
-    libpq-dev libxml2-dev libssl-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip mbstring tokenizer xml bcmath \
-    && docker-php-ext-configure gd --with-jpeg --with-freetype \
-    && docker-php-ext-install gd
+# Install build dependencies for PHP extensions and Node.js
+RUN apk add --no-cache --virtual .build-deps \
+    git \
+    unzip \
+    curl \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    freetype-dev \
+    libwebp-dev \
+    libpq-dev \
+    build-base \
+    nodejs \
+    npm \
+    yarn && \
+    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp && \
+    docker-php-ext-install \
+        pdo_mysql \
+        pdo_pgsql \
+        zip \
+        gd
 
 # Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Set working directory for the build
+WORKDIR /app
+
+# Install Node.js globally (already in image), but ensure npm is updated
+RUN npm install -g npm
+
+# Clean up build dependencies to reduce image size
+RUN apk del .build-deps
+
+# Stage 2: Runtime stage
+FROM php:8.3-fpm-alpine
+
+# Install only runtime dependencies
+RUN apk add --no-cache \
+    libpq \
+    libpng \
+    libjpeg \
+    libwebp \
+    libzip \
+    nodejs \
+    npm \
+    yarn \
+    bash
+
+# Copy Composer from the build stage
+COPY --from=build /usr/local/bin/composer /usr/local/bin/composer
+
+# Copy PHP extensions and configuration from the build stage
+COPY --from=build /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+COPY --from=build /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
 
 # Set working directory
-WORKDIR /var/www
+WORKDIR /app
 
-# Copy Laravel app source code
+# Copy application files (codebase)
 COPY . .
 
-# Copy frontend build output
-COPY --from=frontend /app/public/build /var/www/public/build
+# Ensure Laravel directories exist
+RUN mkdir -p /app/storage /app/bootstrap/cache
 
-# Install PHP dependencies including dev (faker, artisan, etc.)
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+# Set appropriate permissions
+RUN chmod -R 775 /app/storage /app/bootstrap/cache && \
+    chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www \
-    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+# Optional: Create symbolic link for storage (if needed)
+# RUN php artisan storage:link
 
-# Optional: Set Laravel permissions via entrypoint (if using)
-# COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-# RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-# Expose port 9000 (php-fpm default)
-EXPOSE 9000
-
-# Default command
-CMD ["php-fpm"]
+# Install PHP dependencies and build frontend assets
+CMD ["sh", "-c", "composer install --optimize-autoloader --no-dev && \
+    npm install && \
+    npm run build && \
+    php artisan key:generate && \
+    php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache && \
+    php artisan migrate --force && \
+    php artisan db:seed --force && \
+    php-fpm -F"]
