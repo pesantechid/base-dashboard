@@ -15,34 +15,25 @@ RUN apk add --no-cache --virtual .build-deps \
     freetype-dev \
     libwebp-dev \
     libpq-dev \
+    postgresql-dev \
+    autoconf \
+    g++ \
+    make \
+    pkgconfig \
     build-base \
     nodejs \
     npm \
     yarn
 
 # ---------------------------------------------------------
-# FIX: Symlink untuk header yang tidak ditemukan
+# Install PHP extensions dengan konfigurasi yang benar
 # ---------------------------------------------------------
-# PHP 8.2+ butuh ini karena lokasi header berubah
-RUN ln -sf /usr/include/freetype2 /usr/include/freetype
-RUN ln -sf /usr/lib/libjpeg.so /usr/lib/libjpeg.so.8  # Fix libjpeg with force
-
-# ---------------------------------------------------------
-# Konfigurasi GD sebelum install
-# ---------------------------------------------------------
-RUN docker-php-ext-configure gd \
-    --with-freetype \
-    --with-jpeg \
-    --with-webp
-
-# ---------------------------------------------------------
-# Install PHP extensions
-# ---------------------------------------------------------
-RUN docker-php-ext-install \
-    pdo_mysql \
-    pdo_pgsql \
-    zip \
-    gd
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo_mysql \
+        pdo_pgsql \
+        zip \
+        gd
 
 # ---------------------------------------------------------
 # Install Composer
