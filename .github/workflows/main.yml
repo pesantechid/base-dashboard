@@ -55,8 +55,6 @@ jobs:
             docker image prune -af --filter "dangling=true"
             docker volume prune -f
 
-            # Pastikan network pesantech-network ada
-            docker network create pesantech-network 2>/dev/null || true
           EOF
 
       # Step 7: Ensure the server code is up to date with GitHub
