@@ -39,7 +39,7 @@ class PostService
         $query = $query->applyFilters($filters);
 
         return $query->paginateData([
-            'per_page' => config('settings.default_pagination') ?? 10,
+            'per_page' => $filters['per_page'] ?? config('settings.default_pagination') ?? 10,
         ]);
     }
 
@@ -161,5 +161,22 @@ class PostService
         }
 
         return $post->load(['author', 'terms']);
+    }
+
+    public function getPostBySlug(?string $slug, ?string $postType = null): ?Post
+    {
+        if (empty($slug)) {
+            return null;
+        }
+
+        $query = Post::query()
+            ->with(['user', 'terms'])
+            ->where('slug', $slug);
+
+        if ($postType) {
+            $query->where('post_type', $postType);
+        }
+
+        return $query->firstOrFail();
     }
 }

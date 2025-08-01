@@ -191,8 +191,8 @@ COPY . .
 RUN mkdir -p /app/storage /app/bootstrap/cache
 
 # Set permissions
-RUN chmod -R 775 /app/storage /app/bootstrap/cache && \
-    chown -R www-data:www-data /app/storage /app/bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache && \
+    chown -R www-data:www-data storage bootstrap/cache
 
 # Default command
 CMD ["sh", "-c", "composer install --optimize-autoloader --no-dev --ignore-platform-reqs && \

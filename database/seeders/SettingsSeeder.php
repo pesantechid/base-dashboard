@@ -41,7 +41,8 @@ class SettingsSeeder extends Seeder
             ['option_name' => 'text_color_dark', 'option_value' => '#f8f9fa'],
 
             // Site logo and icons.
-            ['option_name' => 'site_logo_lite', 'option_value' => '/images/logo/spidest-dashboard.png'],
+            ['option_name' => 'site_logo_lite', 'option_value' => '/images/logo/logo-spidest
+           .png'],
             ['option_name' => 'site_logo_dark', 'option_value' => '/images/logo/spidest-dashboard-dark.png'],
             ['option_name' => 'site_icon', 'option_value' => '/images/logo/icon.png'],
             ['option_name' => 'site_favicon', 'option_value' => '/images/logo/icon.png'],

@@ -24,7 +24,7 @@
                     @include('backend.pages.dashboard.partials.card', [
                         'icon_svg' => asset('images/icons/user.svg'),
                         'label' => __('Users'),
-                        'value' => $total_users,
+                            'value' => $total_users,
                         'bg' => '#635BFF',
                         'class' => 'bg-white',
                         'url' => route('admin.users.index'),
@@ -81,7 +81,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="mt-6">
             <div class="grid grid-cols-12 gap-4 md:gap-6">
                 <div class="col-span-12">

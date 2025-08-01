@@ -4,16 +4,21 @@ services:
   php-app-spidest:
     image: ${IMAGE_NAME}
     container_name: php-app-spidest
+    labels:
+      - "app=webspidest"
     ports:
       - "9000:9000"
     volumes:
       - /home/pesantech/projects/web-spidest:/app
     networks:
       - app-network
+      - pesantech-network
 
   nginx-app-spidest:
     image: nginx:alpine
     container_name: nginx-app-spidest
+    labels:
+      - "app=webspidest"
     ports:
       - "80:80"
     volumes:
@@ -23,7 +28,11 @@ services:
       - php-app-spidest
     networks:
       - app-network
+      - pesantech-network
 
 networks:
-  app-network:
+  app-network:              # DB network posgres
     driver: bridge
+  pesantech-network:         # ← reverse proxy
+    external: true
+    name: pesantech-network
