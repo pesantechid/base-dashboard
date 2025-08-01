@@ -49,7 +49,12 @@ jobs:
           ssh -T -i private_key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             cd /home/pesantech/projects/web-rmb
             docker compose down
-            docker system prune -af --filter "label=app=web-rmb"
+
+            # Cleanup spesifik, jangan hapus network
+            docker container prune -f
+            docker image prune -af --filter "dangling=true"
+            docker volume prune -f
+
           EOF
 
       # Step 7: Ensure the server code is up to date with GitHub
@@ -74,7 +79,7 @@ jobs:
             cd /home/pesantech/projects/web-rmb
             echo "IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/php-app-rmb:${{ env.COMMIT_ID }}" >> .env
             docker compose up -d
-            
+
             # Restart reverse proxy untuk update routing
             cd /home/pesantech/projects/reverse-proxy
             docker compose restart reverse-proxy
