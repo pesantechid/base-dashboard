@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  php-app-rmb:
+    image: ${IMAGE_NAME}
+    container_name: php-app-rmb
+    labels:
+      - "app=webrmb"
+    ports:
+      - "9001:9000"
+    volumes:
+      - /home/pesantech/projects/web-rmb:/app
+    networks:
+      - app-network
+      - pesantech-network
+
+  nginx-app-rmb:
+    image: nginx:alpine
+    container_name: nginx-app-rmb
+    labels:
+      - "app=webrmb"
+    ports:
+      - "81:80"
+    volumes:
+      - /home/pesantech/projects/web-rmb:/app
+      - /home/pesantech/projects/web-rmb/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php-app-rmb
+    networks:
+      - app-network
+      - pesantech-network
+
+networks:
+  app-network:                # DB network posgres
+    driver: bridge
+  pesantech-network:          # ← reverse proxy
+    external: true
+    name: pesantech-network

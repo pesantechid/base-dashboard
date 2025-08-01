@@ -1,3 +1,5 @@
 {
-    "Crm": true
+    "Crm": true,
+    "MasterData": true,
+    "Inventory": true
 }
