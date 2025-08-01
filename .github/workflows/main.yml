@@ -56,7 +56,6 @@ jobs:
             docker volume prune -f
 
             # Pastikan network pesantech-network ada
-            docker network create app-network 2>/dev/null || true
             docker network create pesantech-network 2>/dev/null || true
           EOF
 
