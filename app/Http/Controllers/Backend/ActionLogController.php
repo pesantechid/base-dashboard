@@ -19,7 +19,7 @@ class ActionLogController extends Controller
         $this->checkAuthorization(Auth::user(), ['actionlog.view']);
 
         return view('backend.pages.action-logs.index', [
-            'actionLogs' => $this->actionLogService->getActionLogs(),
+            'actionLogs' => $this->actionLogService->getPaginatedActionLogs(),
             'breadcrumbs' => [
                 'title' => __('Action Logs'),
             ],

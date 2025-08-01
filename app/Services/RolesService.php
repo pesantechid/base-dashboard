@@ -33,7 +33,7 @@ class RolesService
             $query->where('name', 'like', '%' . $search . '%');
         }
 
-        return $query->paginate($perPage);
+        return $query->paginate(config('settings.default_pagination', $perPage));
     }
 
     public static function getPermissionsByGroupName(string $group_name): Collection
@@ -328,5 +328,21 @@ class RolesService
                     'term.view',
                 ];
         }
+    }
+
+    /**
+     * Create a new role (API wrapper)
+     */
+    public function create(array $data): Role
+    {
+        return $this->createRole($data['name'], $data['permissions'] ?? []);
+    }
+
+    /**
+     * Update a role (API wrapper)
+     */
+    public function update(Role $role, array $data): Role
+    {
+        return $this->updateRole($role, $data['name'], $data['permissions'] ?? []);
     }
 }

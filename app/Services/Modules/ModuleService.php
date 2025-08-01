@@ -7,11 +7,13 @@ namespace App\Services\Modules;
 use App\Exceptions\ModuleException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Nwidart\Modules\Facades\Module as ModuleFacade;
 use Nwidart\Modules\Module;
+use App\Models\Module as ModuleModel;
 
 class ModuleService
 {
@@ -30,6 +32,28 @@ class ModuleService
         return ModuleFacade::find(strtolower($moduleName));
     }
 
+    public function getModuleByName(string $moduleName): ?ModuleModel
+    {
+        $module = $this->findModuleByName($moduleName);
+        if (! $module) {
+            return null;
+        }
+
+        $moduleData = json_decode(File::get($module->getPath() . '/module.json'), true);
+        $moduleStatuses = $this->getModuleStatuses();
+
+        return new ModuleModel([
+            'id' => $module->getName(),
+            'name' => $module->getName(),
+            'title' => $moduleData['name'] ?? $module->getName(),
+            'description' => $moduleData['description'] ?? '',
+            'icon' => $moduleData['icon'] ?? 'bi-box',
+            'status' => $moduleStatuses[$module->getName()] ?? false,
+            'version' => $moduleData['version'] ?? '1.0.0',
+            'tags' => $moduleData['keywords'] ?? [],
+        ]);
+    }
+
     /**
      * Get the module statuses from the modules_statuses.json file.
      */
@@ -45,37 +69,34 @@ class ModuleService
     /**
      * Get all modules from the Modules folder.
      */
-    public function getModules(): array
+    public function getPaginatedModules(int $perPage = 15): LengthAwarePaginator
     {
         $modules = [];
-        $moduleStatuses = $this->getModuleStatuses();
-
         if (! File::exists($this->modulesPath)) {
-            throw new ModuleException(__('Modules directory does not exist. Please ensure the "Modules" directory is present in the application root.'));
+            throw new ModuleException(message: __('Modules directory does not exist. Please ensure the "Modules" directory is present in the application root.'));
         }
 
         $moduleDirectories = File::directories($this->modulesPath);
 
         foreach ($moduleDirectories as $moduleDirectory) {
-            $moduleJsonPath = $moduleDirectory.'/module.json';
-            if (! File::exists($moduleJsonPath)) {
-                throw new ModuleException(__('Invalid module structure. Each module must have a module.json file.'));
+            $module = $this->getModuleByName(basename($moduleDirectory));
+            if ($module) {
+                $modules[] = $module;
             }
-
-            $moduleData = json_decode(File::get($moduleJsonPath), true);
-            $moduleName = basename($moduleDirectory);
-            $modules[] = [
-                'name' => $moduleName,
-                'title' => $moduleData['name'] ?? $moduleName,
-                'description' => $moduleData['description'] ?? '',
-                'icon' => $moduleData['icon'] ?? 'bi-box',
-                'status' => $moduleStatuses[$moduleName] ?? false,
-                'version' => $moduleData['version'] ?? '1.0.0',
-                'tags' => $moduleData['keywords'] ?? [],
-            ];
         }
 
-        return $modules;
+        // Manually paginate the array.
+        $page = request('page', 1);
+        $collection = collect($modules);
+        $paged = new LengthAwarePaginator(
+            $collection->forPage($page, $perPage),
+            $collection->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        return $paged;
     }
 
     public function uploadModule(Request $request)
@@ -84,7 +105,7 @@ class ModuleService
         $filePath = $file->storeAs('modules', $file->getClientOriginalName());
 
         // Extract and install the module.
-        $modulePath = storage_path('app/'.$filePath);
+        $modulePath = storage_path('app/' . $filePath);
         $zip = new \ZipArchive();
 
         if (! $zip->open($modulePath)) {
@@ -97,7 +118,7 @@ class ModuleService
 
         // Check valid module structure.
         $moduleName = str_replace('/', '', $moduleName);
-        if (! File::exists($this->modulesPath.'/'.$moduleName.'/module.json')) {
+        if (! File::exists($this->modulesPath . '/' . $moduleName . '/module.json')) {
             throw new ModuleException(__('Failed to find the module in the system. Please ensure the module has a valid module.json file.'));
         }
 
@@ -122,7 +143,7 @@ class ModuleService
             $callbackName = $enable ? 'module:enable' : 'module:disable';
             Artisan::call($callbackName, ['module' => $moduleName]);
         } catch (\Throwable $th) {
-            Log::error("Failed to toggle module {$moduleName}: ".$th->getMessage());
+            Log::error("Failed to toggle module {$moduleName}: " . $th->getMessage());
             throw new ModuleException(__('Failed to toggle module status. Please check the logs for more details.'));
         }
 
@@ -133,7 +154,7 @@ class ModuleService
     {
         $moduleStatuses = $this->getModuleStatuses();
 
-        if (! isset($moduleStatuses[$moduleName]) && ! File::exists($this->modulesPath.'/'.$moduleName)) {
+        if (! isset($moduleStatuses[$moduleName]) && ! File::exists($this->modulesPath . '/' . $moduleName)) {
             throw new ModuleException(__('Module not found.'));
         }
 
@@ -166,7 +187,7 @@ class ModuleService
         Artisan::call('module:disable', ['module' => $module->getName()]);
 
         // Remove the module files.
-        $modulePath = base_path('Modules/'.$module->getName());
+        $modulePath = base_path('Modules/' . $module->getName());
 
         if (! is_dir($modulePath)) {
             throw new ModuleException(__('Module directory does not exist. Please ensure the module is installed correctly.'));

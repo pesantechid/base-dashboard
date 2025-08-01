@@ -32,54 +32,54 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Permissions Section -->
-                    <div class="rounded-lg border border-gray-200 bg-white shadow-md dark:border-gray-800 dark:bg-gray-900">
-                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
-                                {{ __('Permissions') }}
-                            </h3>
+                <!-- Permissions Section -->
+                <div class="rounded-lg border border-gray-200 bg-white shadow-md dark:border-gray-800 dark:bg-gray-900">
+                    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                            {{ __('Permissions') }}
+                        </h3>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-4">
+                            <input type="checkbox" id="checkPermissionAll" class="mr-2">
+                            <label for="checkPermissionAll" class="text-sm text-gray-700 dark:text-gray-400">
+                                {{ __('Select All') }}
+                            </label>
                         </div>
-                        <div class="p-4">
-                            <div class="mb-4">
-                                <input type="checkbox" id="checkPermissionAll" class="mr-2">
-                                <label for="checkPermissionAll" class="text-sm text-gray-700 dark:text-gray-400">
-                                    {{ __('Select All') }}
-                                </label>
-                            </div>
-                            <hr class="mb-6">
-                            @php $i = 1; @endphp
-                            @foreach ($permission_groups as $group)
-                                <div class="mb-6">
-                                    <div class="flex items-center mb-2">
-                                        <input type="checkbox" id="group{{ $i }}Management" class="mr-2">
-                                        <label for="group{{ $i }}Management"
-                                            class="capitalize text-sm font-medium text-gray-700 dark:text-gray-400">
-                                            {{ ucfirst($group->name) }}
-                                        </label>
-                                    </div>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4"
-                                        data-group="group{{ $i }}Management">
-                                        @php
-                                            $permissions = $roleService->getPermissionsByGroupName($group->name);
-                                        @endphp
-                                        @foreach ($permissions as $permission)
-                                            <div>
-                                                <input type="checkbox" id="checkPermission{{ $permission->id }}"
-                                                    name="permissions[]" value="{{ $permission->name }}" class="mr-2">
-                                                <label for="checkPermission{{ $permission->id }}"
-                                                    class="capitalize text-sm text-gray-700 dark:text-gray-400">
-                                                    {{ $permission->name }}
-                                                </label>
-                                            </div>
-                                        @endforeach
-                                    </div>
+                        <hr class="mb-6">
+                        @php $i = 1; @endphp
+                        @foreach ($permission_groups as $group)
+                            <div class="mb-6">
+                                <div class="flex items-center mb-2">
+                                    <input type="checkbox" id="group{{ $i }}Management" class="mr-2">
+                                    <label for="group{{ $i }}Management"
+                                        class="capitalize text-sm font-medium text-gray-700 dark:text-gray-400">
+                                        {{ ucfirst($group->name) }}
+                                    </label>
                                 </div>
-                                @php $i++; @endphp
-                            @endforeach
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+                                    data-group="group{{ $i }}Management">
+                                    @php
+                                        $permissions = $roleService->getPermissionsByGroupName($group->name);
+                                    @endphp
+                                    @foreach ($permissions as $permission)
+                                        <div>
+                                            <input type="checkbox" id="checkPermission{{ $permission->id }}"
+                                                name="permissions[]" value="{{ $permission->name }}" class="mr-2">
+                                            <label for="checkPermission{{ $permission->id }}"
+                                                class="capitalize text-sm text-gray-700 dark:text-gray-400">
+                                                {{ $permission->name }}
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @php $i++; @endphp
+                        @endforeach
 
-                            <x-buttons.submit-buttons cancelUrl="{{ route('admin.roles.index') }}" />
-                        </div>
+                        <x-buttons.submit-buttons cancelUrl="{{ route('admin.roles.index') }}" />
                     </div>
                 </div>
         </form>

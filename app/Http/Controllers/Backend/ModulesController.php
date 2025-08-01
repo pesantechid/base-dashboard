@@ -22,7 +22,7 @@ class ModulesController extends Controller
         $this->checkAuthorization(Auth::user(), ['module.view']);
 
         return view('backend.pages.modules.index', [
-            'modules' => $this->moduleService->getModules(),
+            'modules' => $this->moduleService->getPaginatedModules(),
             'breadcrumbs' => [
                 'title' => __('Modules'),
             ],
