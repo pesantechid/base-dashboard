@@ -77,10 +77,15 @@ jobs:
         run: |
           ssh -T -i private_key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             cd /home/pesantech/projects/web-rmb
+
+            if grep -q '^IMAGE_NAME=' .env; then
+            sed -i "s|^IMAGE_NAME=.*|IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/php-app-rmb:${{ env.COMMIT_ID }}|" .env
+            else
             echo "IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/php-app-rmb:${{ env.COMMIT_ID }}" >> .env
+            fi
+
             docker compose up -d
 
-            # Restart reverse proxy untuk update routing
             cd /home/pesantech/projects/reverse-proxy
             docker compose restart reverse-proxy
           EOF
